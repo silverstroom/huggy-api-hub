@@ -14,6 +14,7 @@ interface DailyOccupancyChartProps {
 
 export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: DailyOccupancyChartProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [focusWeek, setFocusWeek] = useState(true); // default: focus on Ferragosto week
 
   const dailyData = useMemo(() => {
     const days = eachDayOfInterval({
