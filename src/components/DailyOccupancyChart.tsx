@@ -58,9 +58,20 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
 
   return (
     <div className="bg-card rounded-xl border border-border p-4 mb-4">
-      <h3 className="text-sm font-semibold text-foreground mb-3">Presenze giornaliere</h3>
-      <div className="flex items-end gap-[2px] h-32">
-        {dailyData.map(({ date, persons }) => {
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-foreground">
+          Presenze giornaliere {focusWeek && <span className="text-muted-foreground font-normal">· {FOCUS_START}–{FOCUS_END} ago</span>}
+        </h3>
+        <button
+          onClick={() => setFocusWeek(!focusWeek)}
+          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {focusWeek ? <ZoomOut className="w-3 h-3" /> : <ZoomIn className="w-3 h-3" />}
+          {focusWeek ? "Mese intero" : "Ferragosto"}
+        </button>
+      </div>
+      <div className={`flex items-end gap-[3px] h-36`}>
+        {displayData.map(({ date, persons }) => {
           const heightPct = maxPersons > 0 ? (persons / maxPersons) * 100 : 0;
           const overCapacity = persons > maxCapacity;
           const isSelected = selectedDate && isSameDay(date, selectedDate);
