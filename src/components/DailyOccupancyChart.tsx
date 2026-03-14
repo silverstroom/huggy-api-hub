@@ -106,8 +106,8 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
           style={{ bottom: `${(maxCapacity / maxPersons) * 144}px` }}
         />
       </div>
-      <div className="flex gap-[2px] mt-1">
-        {dailyData.map(({ date, persons }, i) => (
+      <div className="flex gap-[3px] mt-1">
+        {displayData.map(({ date, persons }, i) => (
           <div
             key={i}
             className="flex-1 text-center cursor-pointer"
