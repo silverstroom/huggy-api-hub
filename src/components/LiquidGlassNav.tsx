@@ -1,145 +1,49 @@
-import { useState } from "react";
-import { CalendarDays, List, Search, Filter } from "lucide-react";
-import { BookingStatus, ViewMode } from "@/types/booking";
-import { motion, AnimatePresence } from "framer-motion";
+import { CalendarDays, List, Search, X } from "lucide-react";
+import { ViewMode } from "@/types/booking";
+import { motion } from "framer-motion";
 
 interface LiquidGlassNavProps {
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
-  statusFilter: BookingStatus;
-  setStatusFilter: (status: BookingStatus) => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   showSearch: boolean;
   setShowSearch: (v: boolean) => void;
 }
 
-const STATUS_OPTIONS: { value: BookingStatus; label: string }[] = [
-  { value: "all", label: "Tutte" },
-  { value: "paid", label: "Pagate" },
-  { value: "pending", label: "In attesa" },
-  { value: "cancelled", label: "Cancellate" },
-];
-
-const STATUS_COLORS: Record<BookingStatus, string> = {
-  all: "bg-primary/15 text-primary border-primary/30",
-  paid: "bg-emerald-500/15 text-emerald-700 border-emerald-500/30",
-  pending: "bg-amber-500/15 text-amber-700 border-amber-500/30",
-  cancelled: "bg-red-500/15 text-red-700 border-red-500/30",
-};
-
 export function LiquidGlassNav({
   viewMode,
   setViewMode,
-  statusFilter,
-  setStatusFilter,
-  searchQuery,
-  setSearchQuery,
   showSearch,
   setShowSearch,
 }: LiquidGlassNavProps) {
-  const [showFilter, setShowFilter] = useState(false);
-
   return (
-    <>
-      {/* Search overlay */}
-      <AnimatePresence>
-        {showSearch && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-24 left-4 right-4 z-50 lg:hidden"
-          >
-            <div className="glass-surface rounded-2xl p-3">
-              <input
-                type="text"
-                placeholder="Cerca cliente..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                autoFocus
-                className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Status filter pills overlay */}
-      <AnimatePresence>
-        {showFilter && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="fixed bottom-24 left-4 right-4 z-50 lg:hidden"
-          >
-            <div className="glass-surface rounded-2xl p-3">
-              <div className="flex gap-2 flex-wrap justify-center">
-                {STATUS_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => {
-                      setStatusFilter(opt.value);
-                      setShowFilter(false);
-                    }}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-full border transition-all ${
-                      statusFilter === opt.value
-                        ? STATUS_COLORS[opt.value]
-                        : "bg-muted/50 text-muted-foreground border-transparent"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Bottom navbar - liquid glass */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden pb-safe">
-        <div className="mx-3 mb-3">
-          <div className="glass-surface rounded-[22px] px-2 py-2">
-            <div className="flex items-center justify-around">
-              {/* Calendar view */}
-              <NavButton
-                active={viewMode === "calendar"}
-                onClick={() => setViewMode("calendar")}
-                icon={<CalendarDays className="w-5 h-5" />}
-                label="Calendario"
-              />
-
-              {/* List view */}
-              <NavButton
-                active={viewMode === "list"}
-                onClick={() => setViewMode("list")}
-                icon={<List className="w-5 h-5" />}
-                label="Lista"
-              />
-
-              {/* Search */}
-              <NavButton
-                active={showSearch}
-                onClick={() => { setShowSearch(!showSearch); setShowFilter(false); }}
-                icon={<Search className="w-5 h-5" />}
-                label="Cerca"
-              />
-
-              {/* Filter */}
-              <NavButton
-                active={showFilter || statusFilter !== "all"}
-                onClick={() => { setShowFilter(!showFilter); setShowSearch(false); }}
-                icon={<Filter className="w-5 h-5" />}
-                label={STATUS_OPTIONS.find((o) => o.value === statusFilter)?.label || "Filtro"}
-                badge={statusFilter !== "all"}
-              />
-            </div>
+    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden pb-safe">
+      <div className="mx-3 mb-3">
+        <div className="glass-surface rounded-[22px] px-2 py-2">
+          <div className="flex items-center justify-around">
+            <NavButton
+              active={viewMode === "calendar" && !showSearch}
+              onClick={() => { setViewMode("calendar"); setShowSearch(false); }}
+              icon={<CalendarDays className="w-5 h-5" />}
+              label="Calendario"
+            />
+            <NavButton
+              active={viewMode === "list" && !showSearch}
+              onClick={() => { setViewMode("list"); setShowSearch(false); }}
+              icon={<List className="w-5 h-5" />}
+              label="Lista"
+            />
+            <NavButton
+              active={showSearch}
+              onClick={() => setShowSearch(!showSearch)}
+              icon={showSearch ? <X className="w-5 h-5" /> : <Search className="w-5 h-5" />}
+              label={showSearch ? "Chiudi" : "Cerca"}
+            />
           </div>
         </div>
-      </nav>
-    </>
+      </div>
+    </nav>
   );
 }
 
@@ -148,18 +52,16 @@ function NavButton({
   onClick,
   icon,
   label,
-  badge,
 }: {
   active: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   label: string;
-  badge?: boolean;
 }) {
   return (
     <button
       onClick={onClick}
-      className="relative flex flex-col items-center gap-0.5 px-4 py-1.5 rounded-2xl transition-all duration-200"
+      className="relative flex flex-col items-center gap-0.5 px-5 py-1.5 rounded-2xl transition-all duration-200"
     >
       {active && (
         <motion.div
@@ -178,9 +80,6 @@ function NavButton({
       >
         {label}
       </span>
-      {badge && (
-        <span className="absolute top-1 right-3 w-1.5 h-1.5 rounded-full bg-primary" />
-      )}
     </button>
   );
 }
