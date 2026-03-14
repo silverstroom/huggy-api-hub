@@ -56,7 +56,19 @@ export default function Index() {
 
         {/* Stats */}
         <div className="mb-4 md:mb-6">
-          <StatsCards bookings={filteredBookings} currentMonth={currentMonth} />
+          <StatsCards bookings={filteredBookings} currentMonth={currentMonth} maxCapacity={maxCapacity} />
+          <div className="flex items-center gap-2 mt-2">
+            <Settings2 className="w-3.5 h-3.5 text-muted-foreground" />
+            <span className="text-xs text-muted-foreground">Capienza max/giorno:</span>
+            <input
+              type="number"
+              min={1}
+              value={maxCapacity}
+              onChange={(e) => setMaxCapacity(Math.max(1, Number(e.target.value)))}
+              className="w-16 px-2 py-0.5 text-xs rounded bg-card border border-border text-foreground focus:outline-none focus:ring-2 focus:ring-ring/30"
+            />
+            <span className="text-xs text-muted-foreground">persone</span>
+          </div>
         </div>
 
         {/* Month navigation */}
