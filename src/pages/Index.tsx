@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { it } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, CalendarDays, List, Search, Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import { ChevronLeft, ChevronRight, CalendarDays, List, Search, Loader2, AlertCircle, RefreshCw, Settings2 } from "lucide-react";
 import { useBookings } from "@/hooks/useBookings";
 import { StatsCards } from "@/components/StatsCards";
 import { CalendarGrid } from "@/components/CalendarGrid";
