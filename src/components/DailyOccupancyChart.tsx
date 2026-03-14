@@ -103,7 +103,7 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
       <div className="relative h-0 -mt-[1px]" style={{ bottom: `${(maxCapacity / maxPersons) * 100}%` }}>
         <div
           className="absolute left-0 right-0 border-t border-dashed border-destructive/50"
-          style={{ bottom: `${(maxCapacity / maxPersons) * 128}px` }}
+          style={{ bottom: `${(maxCapacity / maxPersons) * 144}px` }}
         />
       </div>
       <div className="flex gap-[2px] mt-1">
