@@ -7,6 +7,7 @@ import { StatsCards } from "@/components/StatsCards";
 import { CalendarGrid } from "@/components/CalendarGrid";
 import { BookingListView } from "@/components/BookingListView";
 import { MobileDayList } from "@/components/MobileDayList";
+import { DailyOccupancyChart } from "@/components/DailyOccupancyChart";
 import { LiquidGlassNav } from "@/components/LiquidGlassNav";
 import { useIsMobile } from "@/hooks/use-mobile";
 import type { BookingStatus, ViewMode } from "@/types/booking";
