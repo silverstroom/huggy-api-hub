@@ -26,10 +26,10 @@ async function fetchBookings(from: Date, to: Date): Promise<BookingsResponse> {
   }
 }
 
-export function useBookings(from: Date, to: Date, status?: string) {
+export function useBookings(from: Date, to: Date) {
   return useQuery({
-    queryKey: ["bookings", format(from, "yyyy-MM-dd"), format(to, "yyyy-MM-dd"), status],
-    queryFn: () => fetchBookings(from, to, status),
+    queryKey: ["bookings", format(from, "yyyy-MM-dd"), format(to, "yyyy-MM-dd")],
+    queryFn: () => fetchBookings(from, to),
     retry: 0,
     staleTime: 60_000,
   });

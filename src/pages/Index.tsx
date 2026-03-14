@@ -32,7 +32,7 @@ export default function Index() {
   const from = startOfMonth(currentMonth);
   const to = endOfMonth(currentMonth);
 
-  const { data, isLoading, isError, refetch } = useBookings(from, to, statusFilter !== "all" ? statusFilter : undefined);
+  const { data, isLoading, isError, refetch } = useBookings(from, to);
 
   // Auto-focus search input when opened
   useEffect(() => {
