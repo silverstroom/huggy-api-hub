@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { eachDayOfInterval, startOfMonth, endOfMonth, format, isWithinInterval, parseISO, isSameDay, getDate } from "date-fns";
 import { it } from "date-fns/locale";
-import { X, Users } from "lucide-react";
+import { X, Users, ZoomIn, ZoomOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getBookingColor } from "@/lib/bookingColors";
 import type { Booking } from "@/types/booking";
