@@ -97,8 +97,6 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
               {format(date, "d")}
             </span>
           </div>
-            )}
-          </div>
         ))}
       </div>
       <p className="text-[10px] text-muted-foreground mt-2">
