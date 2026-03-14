@@ -38,12 +38,23 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
     });
   }, [bookings, currentMonth]);
 
+  const FOCUS_START = 9;
+  const FOCUS_END = 17;
+
+  const displayData = useMemo(() => {
+    if (!focusWeek) return dailyData;
+    return dailyData.filter((d) => {
+      const day = getDate(d.date);
+      return day >= FOCUS_START && day <= FOCUS_END;
+    });
+  }, [dailyData, focusWeek]);
+
   const selectedDayData = useMemo(() => {
     if (!selectedDate) return null;
     return dailyData.find((d) => isSameDay(d.date, selectedDate)) || null;
   }, [selectedDate, dailyData]);
 
-  const maxPersons = Math.max(...dailyData.map((d) => d.persons), maxCapacity);
+  const maxPersons = Math.max(...displayData.map((d) => d.persons), maxCapacity);
 
   return (
     <div className="bg-card rounded-xl border border-border p-4 mb-4">
