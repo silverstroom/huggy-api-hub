@@ -6,14 +6,11 @@ import { mockBookings } from "@/data/mockBookings";
 const API_KEY = "79f6de5558fd03ca977cd98afb292fded9e4defe29e58b85";
 const API_URL = "https://colorfest.it/wp-json/cf/v1/bookings";
 
-async function fetchBookings(from: Date, to: Date, status?: string): Promise<BookingsResponse> {
+async function fetchBookings(from: Date, to: Date): Promise<BookingsResponse> {
   const params = new URLSearchParams({
     from: format(from, "yyyy-MM-dd"),
     to: format(to, "yyyy-MM-dd"),
   });
-  if (status && status !== "all") {
-    params.set("status", status);
-  }
 
   try {
     const res = await fetch(`${API_URL}?${params}`, {
@@ -29,10 +26,10 @@ async function fetchBookings(from: Date, to: Date, status?: string): Promise<Boo
   }
 }
 
-export function useBookings(from: Date, to: Date, status?: string) {
+export function useBookings(from: Date, to: Date) {
   return useQuery({
-    queryKey: ["bookings", format(from, "yyyy-MM-dd"), format(to, "yyyy-MM-dd"), status],
-    queryFn: () => fetchBookings(from, to, status),
+    queryKey: ["bookings", format(from, "yyyy-MM-dd"), format(to, "yyyy-MM-dd")],
+    queryFn: () => fetchBookings(from, to),
     retry: 0,
     staleTime: 60_000,
   });
