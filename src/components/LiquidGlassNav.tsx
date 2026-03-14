@@ -38,7 +38,7 @@ export function LiquidGlassNav({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 20 }}
-          className="fixed bottom-24 left-4 right-4 z-50 md:hidden"
+          className="fixed bottom-24 left-4 right-4 z-50 lg:hidden"
         >
           <div className="glass-surface rounded-2xl p-3">
             <input
@@ -56,7 +56,7 @@ export function LiquidGlassNav({
       {/* Status filter pills overlay */}
 
       {/* Bottom navbar - liquid glass */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 md:hidden pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden pb-safe">
         <div className="mx-3 mb-3">
           <div className="glass-surface rounded-[22px] px-2 py-2">
             <div className="flex items-center justify-around">
