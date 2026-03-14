@@ -21,7 +21,7 @@ const STATUS_OPTIONS: { value: BookingStatus; label: string }[] = [
 
 export default function Index() {
   const [currentMonth, setCurrentMonth] = useState(new Date(2026, 7, 1));
-  const [statusFilter, setStatusFilter] = useState<BookingStatus>("all");
+  const [statusFilter, setStatusFilter] = useState<BookingStatus>("paid");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
