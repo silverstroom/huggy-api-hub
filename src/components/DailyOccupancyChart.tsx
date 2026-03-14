@@ -78,20 +78,11 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
           return (
             <div
               key={date.toISOString()}
-              className="flex-1 flex flex-col items-end justify-end group relative h-full cursor-pointer"
+              className="flex-1 flex flex-col items-center justify-end group relative h-full cursor-pointer"
               onClick={() => setSelectedDate(isSelected ? null : date)}
             >
-              <div className="absolute bottom-full mb-2 hidden group-hover:flex flex-col items-center z-20 left-1/2 -translate-x-1/2 pointer-events-none">
-                <div className="bg-foreground text-background text-xs font-semibold px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap">
-                  <span className="text-primary-foreground/70 font-normal">{format(date, "d MMM", { locale: it })}</span>
-                  {" · "}
-                  <span>{persons}</span>
-                  <span className="text-primary-foreground/70 font-normal"> persone</span>
-                </div>
-                <div className="w-2 h-2 bg-foreground rotate-45 -mt-1" />
-              </div>
               <div
-                className={`w-full min-w-[3px] rounded-t transition-all ${
+                className={`w-full min-w-[3px] rounded-t transition-all relative ${
                   isSelected
                     ? "bg-primary ring-1 ring-primary"
                     : overCapacity
@@ -99,7 +90,15 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
                     : "bg-primary/70"
                 }`}
                 style={{ height: `${Math.max(heightPct, persons > 0 ? 4 : 0)}%` }}
-              />
+              >
+                {/* Tooltip anchored to top of bar */}
+                <div className="absolute -top-9 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center z-20 pointer-events-none">
+                  <div className="bg-foreground text-background text-[11px] font-medium px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap">
+                    {persons} <span className="opacity-70">pers.</span>
+                  </div>
+                  <div className="w-1.5 h-1.5 bg-foreground rotate-45 -mt-[3px]" />
+                </div>
+              </div>
             </div>
           );
         })}
