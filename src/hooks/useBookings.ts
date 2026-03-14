@@ -15,20 +15,25 @@ async function fetchBookings(from: Date, to: Date, status?: string): Promise<Boo
     params.set("status", status);
   }
 
-  const res = await fetch(`${API_URL}?${params}`, {
-    headers: { "X-CF-Key": API_KEY },
-  });
+  try {
+    const res = await fetch(`${API_URL}?${params}`, {
+      headers: { "X-CF-Key": API_KEY },
+    });
 
-  if (!res.ok) throw new Error(`API error: ${res.status}`);
-  return res.json();
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    return res.json();
+  } catch {
+    // CORS or network error — return mock data
+    console.warn("API non raggiungibile, uso dati mock");
+    return { total: mockBookings.length, bookings: mockBookings };
+  }
 }
 
 export function useBookings(from: Date, to: Date, status?: string) {
   return useQuery({
     queryKey: ["bookings", format(from, "yyyy-MM-dd"), format(to, "yyyy-MM-dd"), status],
     queryFn: () => fetchBookings(from, to, status),
-    placeholderData: { total: mockBookings.length, bookings: mockBookings },
-    retry: 1,
+    retry: 0,
     staleTime: 60_000,
   });
 }
