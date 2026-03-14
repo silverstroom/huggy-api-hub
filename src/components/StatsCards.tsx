@@ -1,13 +1,14 @@
 import { Booking } from "@/types/booking";
-import { getDaysInMonth, parseISO, eachDayOfInterval, isWithinInterval } from "date-fns";
+import { getDaysInMonth, parseISO, eachDayOfInterval, isWithinInterval, format } from "date-fns";
 import { CalendarDays, Users, Moon, TrendingUp } from "lucide-react";
 
 interface StatsCardsProps {
   bookings: Booking[];
   currentMonth: Date;
+  maxCapacity: number;
 }
 
-export function StatsCards({ bookings, currentMonth }: StatsCardsProps) {
+export function StatsCards({ bookings, currentMonth, maxCapacity }: StatsCardsProps) {
   const daysInMonth = getDaysInMonth(currentMonth);
   const totalBookings = bookings.length;
   const totalPersons = bookings.reduce((sum, b) => sum + b.persons, 0);
@@ -15,20 +16,29 @@ export function StatsCards({ bookings, currentMonth }: StatsCardsProps) {
   const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
   const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), daysInMonth);
 
-  const nightsSold = bookings.reduce((sum, b) => {
+  // Calculate person-nights per day, then occupancy vs capacity
+  const personNightsPerDay = new Map<string, number>();
+  bookings.forEach((b) => {
     const from = parseISO(b.from);
     const to = parseISO(b.to);
-    const days = eachDayOfInterval({ start: from, end: new Date(to.getTime() - 86400000) });
-    return sum + days.filter((d) => isWithinInterval(d, { start: monthStart, end: monthEnd })).length;
-  }, 0);
+    const nights = eachDayOfInterval({ start: from, end: new Date(to.getTime() - 86400000) });
+    nights.forEach((d) => {
+      if (isWithinInterval(d, { start: monthStart, end: monthEnd })) {
+        const key = format(d, "yyyy-MM-dd");
+        personNightsPerDay.set(key, (personNightsPerDay.get(key) || 0) + b.persons);
+      }
+    });
+  });
 
-  const occupancy = daysInMonth > 0 ? Math.round((nightsSold / daysInMonth) * 100) : 0;
+  const totalPersonNights = Array.from(personNightsPerDay.values()).reduce((a, b) => a + b, 0);
+  const maxPersonNights = maxCapacity * daysInMonth;
+  const occupancy = maxPersonNights > 0 ? Math.round((totalPersonNights / maxPersonNights) * 100) : 0;
 
   const stats = [
-    { label: "Prenotazioni", value: totalBookings, icon: CalendarDays, color: "text-primary" },
-    { label: "Persone", value: totalPersons, icon: Users, color: "text-primary" },
-    { label: "Notti vendute", value: nightsSold, icon: Moon, color: "text-primary" },
-    { label: "Occupazione", value: `${occupancy}%`, icon: TrendingUp, color: "text-primary" },
+    { label: "Prenotazioni", value: totalBookings, icon: CalendarDays },
+    { label: "Persone", value: totalPersons, icon: Users },
+    { label: "Persone-notte", value: totalPersonNights, icon: Moon },
+    { label: "Occupazione", value: `${occupancy}%`, icon: TrendingUp },
   ];
 
   return (
@@ -39,7 +49,7 @@ export function StatsCards({ bookings, currentMonth }: StatsCardsProps) {
           className="bg-card rounded-lg p-4 shadow-[inset_0_0_0_1px_hsl(var(--border))]"
         >
           <div className="flex items-center gap-2 mb-1">
-            <stat.icon className={`w-4 h-4 ${stat.color}`} />
+            <stat.icon className="w-4 h-4 text-primary" />
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {stat.label}
             </span>
