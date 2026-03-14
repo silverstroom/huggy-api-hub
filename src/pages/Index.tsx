@@ -6,6 +6,9 @@ import { useBookings } from "@/hooks/useBookings";
 import { StatsCards } from "@/components/StatsCards";
 import { CalendarGrid } from "@/components/CalendarGrid";
 import { BookingListView } from "@/components/BookingListView";
+import { MobileDayList } from "@/components/MobileDayList";
+import { LiquidGlassNav } from "@/components/LiquidGlassNav";
+import { useIsMobile } from "@/hooks/use-mobile";
 import type { BookingStatus, ViewMode } from "@/types/booking";
 
 const STATUS_OPTIONS: { value: BookingStatus; label: string }[] = [
@@ -16,10 +19,12 @@ const STATUS_OPTIONS: { value: BookingStatus; label: string }[] = [
 ];
 
 export default function Index() {
-  const [currentMonth, setCurrentMonth] = useState(new Date(2026, 7, 1)); // August 2026
+  const [currentMonth, setCurrentMonth] = useState(new Date(2026, 7, 1));
   const [statusFilter, setStatusFilter] = useState<BookingStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const isMobile = useIsMobile();
 
   const from = startOfMonth(currentMonth);
   const to = endOfMonth(currentMonth);
@@ -41,21 +46,20 @@ export default function Index() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-6">
+      <div className="max-w-6xl mx-auto px-4 py-4 md:py-6">
         {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-foreground">Camping Ulisse</h1>
-          <p className="text-sm text-muted-foreground">Calendario prenotazioni Color Fest</p>
+        <div className="mb-4 md:mb-6">
+          <h1 className="text-xl md:text-2xl font-semibold text-foreground">Camping Ulisse</h1>
+          <p className="text-xs md:text-sm text-muted-foreground">Calendario prenotazioni Color Fest</p>
         </div>
 
         {/* Stats */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <StatsCards bookings={filteredBookings} currentMonth={currentMonth} />
         </div>
 
-        {/* Controls */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
-          {/* Month navigation */}
+        {/* Month navigation */}
+        <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <button
               onClick={() => setCurrentMonth(subMonths(currentMonth, 1))}
@@ -63,7 +67,7 @@ export default function Index() {
             >
               <ChevronLeft className="w-5 h-5 text-foreground" />
             </button>
-            <h2 className="text-lg font-semibold text-foreground min-w-[160px] text-center capitalize">
+            <h2 className="text-base md:text-lg font-semibold text-foreground min-w-[140px] md:min-w-[160px] text-center capitalize">
               {format(currentMonth, "MMMM yyyy", { locale: it })}
             </h2>
             <button
@@ -74,8 +78,8 @@ export default function Index() {
             </button>
           </div>
 
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Search */}
+          {/* Desktop controls */}
+          <div className="hidden md:flex items-center gap-2">
             <div className="relative">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <input
@@ -87,7 +91,6 @@ export default function Index() {
               />
             </div>
 
-            {/* Status filter */}
             <div className="flex rounded overflow-hidden border border-border">
               {STATUS_OPTIONS.map((opt) => (
                 <button
@@ -104,7 +107,6 @@ export default function Index() {
               ))}
             </div>
 
-            {/* View toggle */}
             <div className="flex rounded overflow-hidden border border-border">
               <button
                 onClick={() => setViewMode("calendar")}
@@ -149,13 +151,37 @@ export default function Index() {
         )}
 
         {!isLoading && !isError && (
-          viewMode === "calendar" ? (
-            <CalendarGrid bookings={filteredBookings} currentMonth={currentMonth} />
-          ) : (
-            <BookingListView bookings={filteredBookings} />
-          )
+          <>
+            {/* Mobile: day list or list view */}
+            {isMobile ? (
+              viewMode === "list" ? (
+                <BookingListView bookings={filteredBookings} />
+              ) : (
+                <MobileDayList bookings={filteredBookings} currentMonth={currentMonth} />
+              )
+            ) : (
+              // Desktop
+              viewMode === "calendar" ? (
+                <CalendarGrid bookings={filteredBookings} currentMonth={currentMonth} />
+              ) : (
+                <BookingListView bookings={filteredBookings} />
+              )
+            )}
+          </>
         )}
       </div>
+
+      {/* Mobile liquid glass nav */}
+      <LiquidGlassNav
+        viewMode={viewMode}
+        setViewMode={setViewMode}
+        statusFilter={statusFilter}
+        setStatusFilter={setStatusFilter}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        showSearch={showMobileSearch}
+        setShowSearch={setShowMobileSearch}
+      />
     </div>
   );
 }

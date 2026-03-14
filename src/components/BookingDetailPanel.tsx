@@ -21,10 +21,11 @@ function StatusBadge({ status }: { status: string }) {
 
 export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps) {
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {booking && (
         <>
           <motion.div
+            key="overlay"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -32,6 +33,7 @@ export function BookingDetailPanel({ booking, onClose }: BookingDetailPanelProps
             onClick={onClose}
           />
           <motion.div
+            key="panel"
             initial={{ x: "100%" }}
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
