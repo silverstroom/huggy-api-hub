@@ -24,6 +24,7 @@ export default function Index() {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [maxCapacity, setMaxCapacity] = useState(200);
   const isMobile = useIsMobile();
 
   const from = startOfMonth(currentMonth);
