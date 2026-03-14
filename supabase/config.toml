@@ -1,1 +1,4 @@
 project_id = "yrahuernxnodrtvzpgys"
+
+[functions.bookings-proxy]
+verify_jwt = false
