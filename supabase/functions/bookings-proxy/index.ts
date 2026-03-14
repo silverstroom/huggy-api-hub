@@ -18,6 +18,7 @@ serve(async (req) => {
     const url = new URL(req.url);
     const from = url.searchParams.get("from");
     const to = url.searchParams.get("to");
+    const status = url.searchParams.get("status");
 
     if (!from || !to) {
       return new Response(
@@ -27,6 +28,9 @@ serve(async (req) => {
     }
 
     const params = new URLSearchParams({ from, to });
+    if (status) {
+      params.set("status", status);
+    }
     const apiRes = await fetch(`${API_URL}?${params}`, {
       headers: { "X-CF-Key": API_KEY },
     });
