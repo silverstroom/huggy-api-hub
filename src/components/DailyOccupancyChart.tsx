@@ -55,10 +55,10 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
           return (
             <div
               key={date.toISOString()}
-              className="flex-1 flex flex-col items-center group relative cursor-pointer"
+              className="flex-1 flex flex-col items-end justify-end group relative h-full cursor-pointer"
               onClick={() => setSelectedDate(isSelected ? null : date)}
             >
-              <div className="absolute bottom-full mb-1 hidden group-hover:flex flex-col items-center z-10">
+              <div className="absolute bottom-full mb-1 hidden group-hover:flex flex-col items-center z-10 left-1/2 -translate-x-1/2">
                 <div className="bg-foreground text-background text-[10px] font-medium px-2 py-1 rounded whitespace-nowrap">
                   {format(date, "d MMM", { locale: it })}: {persons} persone
                 </div>
@@ -84,11 +84,18 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
         />
       </div>
       <div className="flex gap-[2px] mt-1">
-        {dailyData.map(({ date }, i) => (
-          <div key={i} className="flex-1 text-center">
-            {(i % 5 === 0 || i === dailyData.length - 1) && (
-              <span className="text-[8px] text-muted-foreground">{format(date, "d")}</span>
-            )}
+        {dailyData.map(({ date, persons }, i) => (
+          <div
+            key={i}
+            className="flex-1 text-center cursor-pointer"
+            onClick={() => {
+              const isSelected = selectedDate && isSameDay(date, selectedDate);
+              setSelectedDate(isSelected ? null : date);
+            }}
+          >
+            <span className={`text-[8px] ${selectedDate && isSameDay(date, selectedDate) ? "text-primary font-bold" : "text-muted-foreground"}`}>
+              {format(date, "d")}
+            </span>
           </div>
         ))}
       </div>
