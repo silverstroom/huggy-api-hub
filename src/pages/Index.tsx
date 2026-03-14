@@ -70,6 +70,7 @@ export default function Index() {
             />
             <span className="text-xs text-muted-foreground">persone</span>
           </div>
+          <DailyOccupancyChart bookings={filteredBookings} currentMonth={currentMonth} maxCapacity={maxCapacity} />
         </div>
 
         {/* Month navigation */}
