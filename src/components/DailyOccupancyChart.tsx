@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
-import { eachDayOfInterval, startOfMonth, endOfMonth, format, isWithinInterval, parseISO, isSameDay } from "date-fns";
+import { eachDayOfInterval, startOfMonth, endOfMonth, format, isWithinInterval, parseISO, isSameDay, getDate } from "date-fns";
 import { it } from "date-fns/locale";
-import { X, Users } from "lucide-react";
+import { X, Users, ZoomIn, ZoomOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getBookingColor } from "@/lib/bookingColors";
 import type { Booking } from "@/types/booking";
@@ -14,6 +14,7 @@ interface DailyOccupancyChartProps {
 
 export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: DailyOccupancyChartProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [focusWeek, setFocusWeek] = useState(true); // default: focus on Ferragosto week
 
   const dailyData = useMemo(() => {
     const days = eachDayOfInterval({
@@ -37,18 +38,40 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
     });
   }, [bookings, currentMonth]);
 
+  const FOCUS_START = 9;
+  const FOCUS_END = 17;
+
+  const displayData = useMemo(() => {
+    if (!focusWeek) return dailyData;
+    return dailyData.filter((d) => {
+      const day = getDate(d.date);
+      return day >= FOCUS_START && day <= FOCUS_END;
+    });
+  }, [dailyData, focusWeek]);
+
   const selectedDayData = useMemo(() => {
     if (!selectedDate) return null;
     return dailyData.find((d) => isSameDay(d.date, selectedDate)) || null;
   }, [selectedDate, dailyData]);
 
-  const maxPersons = Math.max(...dailyData.map((d) => d.persons), maxCapacity);
+  const maxPersons = Math.max(...displayData.map((d) => d.persons), maxCapacity);
 
   return (
     <div className="bg-card rounded-xl border border-border p-4 mb-4">
-      <h3 className="text-sm font-semibold text-foreground mb-3">Presenze giornaliere</h3>
-      <div className="flex items-end gap-[2px] h-32">
-        {dailyData.map(({ date, persons }) => {
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="text-sm font-semibold text-foreground">
+          Presenze giornaliere {focusWeek && <span className="text-muted-foreground font-normal">· {FOCUS_START}–{FOCUS_END} ago</span>}
+        </h3>
+        <button
+          onClick={() => setFocusWeek(!focusWeek)}
+          className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors"
+        >
+          {focusWeek ? <ZoomOut className="w-3 h-3" /> : <ZoomIn className="w-3 h-3" />}
+          {focusWeek ? "Mese intero" : "Ferragosto"}
+        </button>
+      </div>
+      <div className={`flex items-end gap-[3px] h-36`}>
+        {displayData.map(({ date, persons }) => {
           const heightPct = maxPersons > 0 ? (persons / maxPersons) * 100 : 0;
           const overCapacity = persons > maxCapacity;
           const isSelected = selectedDate && isSameDay(date, selectedDate);
@@ -80,11 +103,11 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
       <div className="relative h-0 -mt-[1px]" style={{ bottom: `${(maxCapacity / maxPersons) * 100}%` }}>
         <div
           className="absolute left-0 right-0 border-t border-dashed border-destructive/50"
-          style={{ bottom: `${(maxCapacity / maxPersons) * 128}px` }}
+          style={{ bottom: `${(maxCapacity / maxPersons) * 144}px` }}
         />
       </div>
-      <div className="flex gap-[2px] mt-1">
-        {dailyData.map(({ date, persons }, i) => (
+      <div className="flex gap-[3px] mt-1">
+        {displayData.map(({ date, persons }, i) => (
           <div
             key={i}
             className="flex-1 text-center cursor-pointer"
