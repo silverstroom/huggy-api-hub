@@ -55,10 +55,10 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
           return (
             <div
               key={date.toISOString()}
-              className="flex-1 flex flex-col items-center group relative cursor-pointer"
+              className="flex-1 flex flex-col items-end justify-end group relative h-full cursor-pointer"
               onClick={() => setSelectedDate(isSelected ? null : date)}
             >
-              <div className="absolute bottom-full mb-1 hidden group-hover:flex flex-col items-center z-10">
+              <div className="absolute bottom-full mb-1 hidden group-hover:flex flex-col items-center z-10 left-1/2 -translate-x-1/2">
                 <div className="bg-foreground text-background text-[10px] font-medium px-2 py-1 rounded whitespace-nowrap">
                   {format(date, "d MMM", { locale: it })}: {persons} persone
                 </div>
