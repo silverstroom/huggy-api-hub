@@ -208,8 +208,7 @@ export function CalendarGrid({ bookings, currentMonth }: CalendarGridProps) {
                                     }}
                                   >
                                     <div
-                                      className="w-1.5 h-1.5 rounded-full shrink-0"
-                                      style={{ backgroundColor: getBookingColor(bookings.indexOf(b)).hex }}
+                                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${getBookingColor(bookings.indexOf(b)).bg}`}
                                     />
                                     <span className="font-medium text-foreground truncate">{b.customer.name}</span>
                                     <span className="text-muted-foreground ml-auto">{b.persons}p</span>
