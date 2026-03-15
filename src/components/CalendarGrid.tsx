@@ -3,22 +3,17 @@ import { Booking } from "@/types/booking";
 import {
   startOfMonth, endOfMonth, startOfWeek, endOfWeek,
   eachDayOfInterval, format, isSameMonth, parseISO,
-  isToday, isBefore, addDays, isWithinInterval,
+  isToday, addDays,
 } from "date-fns";
 import { it } from "date-fns/locale";
-import { getBookingColor, abbreviateName } from "@/lib/bookingColors";
+import { getBookingColor } from "@/lib/bookingColors";
 import { BookingDetailPanel } from "./BookingDetailPanel";
-import { Users, X } from "lucide-react";
+import { X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface CalendarGridProps {
   bookings: Booking[];
   currentMonth: Date;
-}
-
-interface BookingRow {
-  booking: Booking;
-  colorIndex: number;
 }
 
 const WEEKDAYS = ["Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"];
@@ -41,14 +36,9 @@ export function CalendarGrid({ bookings, currentMonth }: CalendarGridProps) {
     return result;
   }, [days]);
 
-  const bookingRows: BookingRow[] = useMemo(
-    () => bookings.map((b, i) => ({ booking: b, colorIndex: i })),
-    [bookings]
-  );
-
-  // Compute persons per day for all calendar days
+  // Compute persons + bookings per day
   const personsPerDay = useMemo(() => {
-    const map = new Map<string, { persons: number; bookings: Booking[] }>();
+    const map = new Map<string, { persons: number; bookings: Booking[]; bookingCount: number }>();
     bookings.forEach((b) => {
       if (b.status === "cancelled") return;
       const from = parseISO(b.from);
@@ -56,51 +46,22 @@ export function CalendarGrid({ bookings, currentMonth }: CalendarGridProps) {
       const interval = eachDayOfInterval({ start: from, end: addDays(to, -1) });
       interval.forEach((d) => {
         const key = format(d, "yyyy-MM-dd");
-        const existing = map.get(key) || { persons: 0, bookings: [] };
+        const existing = map.get(key) || { persons: 0, bookings: [], bookingCount: 0 };
         existing.persons += b.persons;
         existing.bookings.push(b);
+        existing.bookingCount++;
         map.set(key, existing);
       });
     });
     return map;
   }, [bookings]);
 
-  const getBookingsForDay = (day: Date) => {
-    const dayStr = format(day, "yyyy-MM-dd");
-    return bookingRows.filter(({ booking }) => {
-      return dayStr >= booking.from && dayStr < booking.to;
-    });
-  };
-
-  const getBarSpan = (booking: Booking, weekDays: Date[]) => {
-    const from = parseISO(booking.from);
-    const to = addDays(parseISO(booking.to), -1);
-    const weekStart = weekDays[0];
-    const weekEnd = weekDays[6];
-
-    const barStart = isBefore(from, weekStart) ? weekStart : from;
-    const barEnd = isBefore(to, weekEnd) ? to : weekEnd;
-
-    const startIdx = weekDays.findIndex((d) => format(d, "yyyy-MM-dd") === format(barStart, "yyyy-MM-dd"));
-    const endIdx = weekDays.findIndex((d) => format(d, "yyyy-MM-dd") === format(barEnd, "yyyy-MM-dd"));
-
-    if (startIdx === -1 || endIdx === -1) return null;
-    return { startIdx, span: endIdx - startIdx + 1 };
-  };
-
-  const getWeekBookings = (weekDays: Date[]) => {
-    const seen = new Set<number>();
-    const result: BookingRow[] = [];
-    for (const day of weekDays) {
-      for (const br of getBookingsForDay(day)) {
-        if (!seen.has(br.booking.booking_id)) {
-          seen.add(br.booking.booking_id);
-          result.push(br);
-        }
-      }
-    }
-    return result;
-  };
+  // Find max persons across the month for the heatmap scale
+  const maxPersons = useMemo(() => {
+    let max = 1;
+    personsPerDay.forEach((v) => { if (v.persons > max) max = v.persons; });
+    return max;
+  }, [personsPerDay]);
 
   const popoverData = useMemo(() => {
     if (!popoverDay) return null;
@@ -110,156 +71,134 @@ export function CalendarGrid({ bookings, currentMonth }: CalendarGridProps) {
   return (
     <>
       <div className="bg-card rounded-lg shadow-[inset_0_0_0_1px_hsl(var(--border))] overflow-x-auto relative">
-        <div className="min-w-[500px]">
+        <div className="min-w-[340px]">
           {/* Weekday headers */}
           <div className="grid grid-cols-7 border-b border-border">
             {WEEKDAYS.map((day) => (
-              <div key={day} className="px-1 md:px-2 py-2 text-center">
+              <div key={day} className="px-1 py-2 text-center">
                 <span className="text-[10px] md:text-xs font-medium uppercase tracking-wider text-muted-foreground">{day}</span>
               </div>
             ))}
           </div>
 
           {/* Calendar weeks */}
-          {weeks.map((week, wi) => {
-            const weekBookings = getWeekBookings(week);
-            return (
-              <div key={wi} className="border-b border-border last:border-b-0">
-                {/* Day numbers + person count */}
-                <div className="grid grid-cols-7">
-                  {week.map((day) => {
-                    const dayStr = format(day, "yyyy-MM-dd");
-                    const dayData = personsPerDay.get(dayStr);
-                    const personCount = dayData?.persons || 0;
-                    const isInMonth = isSameMonth(day, currentMonth);
-                    const isPopoverOpen = popoverDay === dayStr;
+          {weeks.map((week, wi) => (
+            <div key={wi} className="grid grid-cols-7 border-b border-border last:border-b-0">
+              {week.map((day) => {
+                const dayStr = format(day, "yyyy-MM-dd");
+                const dayData = personsPerDay.get(dayStr);
+                const personCount = dayData?.persons || 0;
+                const bookingCount = dayData?.bookingCount || 0;
+                const isInMonth = isSameMonth(day, currentMonth);
+                const isPopoverOpen = popoverDay === dayStr;
 
-                    return (
-                      <div
-                        key={day.toISOString()}
-                        className={`relative px-1 md:px-2 pt-1 md:pt-1.5 pb-0.5 border-r border-border last:border-r-0 min-h-[24px] md:min-h-[28px] ${
-                          !isInMonth ? "opacity-30" : ""
+                // Heatmap intensity: 0 to 1
+                const intensity = personCount > 0 ? Math.max(0.08, personCount / maxPersons) : 0;
+
+                return (
+                  <div
+                    key={day.toISOString()}
+                    className={`relative border-r border-border last:border-r-0 min-h-[60px] md:min-h-[72px] p-1 md:p-1.5 flex flex-col cursor-pointer transition-colors ${
+                      !isInMonth ? "opacity-20" : "hover:bg-muted/30"
+                    } ${isPopoverOpen ? "ring-1 ring-inset ring-primary" : ""}`}
+                    onClick={() => {
+                      if (!isInMonth || personCount === 0) return;
+                      setPopoverDay(isPopoverOpen ? null : dayStr);
+                    }}
+                  >
+                    {/* Day number */}
+                    <div className="flex items-start justify-between">
+                      <span
+                        className={`text-[11px] md:text-xs font-medium leading-none ${
+                          isToday(day)
+                            ? "bg-primary text-primary-foreground rounded-full w-5 h-5 inline-flex items-center justify-center text-[10px]"
+                            : "text-foreground"
                         }`}
                       >
-                        <div className="flex items-center justify-between">
-                          <span
-                            className={`text-[10px] md:text-xs font-medium ${
-                              isToday(day)
-                                ? "bg-primary text-primary-foreground rounded-full w-4 h-4 md:w-5 md:h-5 inline-flex items-center justify-center text-[9px] md:text-xs"
-                                : "text-foreground"
-                            }`}
-                          >
-                            {format(day, "d")}
-                          </span>
-                          {personCount > 0 && isInMonth && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setPopoverDay(isPopoverOpen ? null : dayStr);
-                              }}
-                              className={`flex items-center gap-0.5 px-1 py-0.5 rounded text-[8px] md:text-[10px] font-semibold transition-all ${
-                                isPopoverOpen
-                                  ? "bg-primary text-primary-foreground"
-                                  : "bg-primary/10 text-primary hover:bg-primary/20"
-                              }`}
-                            >
-                              <Users className="w-2.5 h-2.5 md:w-3 md:h-3" />
-                              {personCount}
-                            </button>
-                          )}
-                        </div>
+                        {format(day, "d")}
+                      </span>
+                    </div>
 
-                        {/* Popover */}
-                        <AnimatePresence>
-                          {isPopoverOpen && popoverData && (
-                            <motion.div
-                              initial={{ opacity: 0, scale: 0.9, y: -4 }}
-                              animate={{ opacity: 1, scale: 1, y: 0 }}
-                              exit={{ opacity: 0, scale: 0.9, y: -4 }}
-                              transition={{ type: "spring", damping: 22, stiffness: 400 }}
-                              className="absolute top-full left-0 z-50 mt-1 w-56 bg-card rounded-xl border border-border shadow-xl p-3"
-                              onClick={(e) => e.stopPropagation()}
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-1.5">
-                                  <Users className="w-3.5 h-3.5 text-primary" />
-                                  <span className="text-xs font-semibold text-foreground">
-                                    {format(parseISO(dayStr), "d MMMM", { locale: it })}
-                                  </span>
-                                </div>
-                                <button
-                                  onClick={() => setPopoverDay(null)}
-                                  className="p-0.5 rounded hover:bg-muted"
-                                >
-                                  <X className="w-3 h-3 text-muted-foreground" />
-                                </button>
-                              </div>
-                              <p className="text-[10px] text-muted-foreground mb-2">
-                                {popoverData.persons} persone · {popoverData.bookings.length} prenotazion{popoverData.bookings.length === 1 ? "e" : "i"}
-                              </p>
-                              <div className="space-y-1 max-h-32 overflow-y-auto">
-                                {popoverData.bookings.map((b, i) => (
-                                  <div
-                                    key={b.booking_id}
-                                    className="flex items-center gap-2 px-2 py-1 rounded-lg bg-muted/50 text-[10px] cursor-pointer hover:bg-muted transition-colors"
-                                    onClick={() => {
-                                      setSelectedBooking(b);
-                                      setPopoverDay(null);
-                                    }}
-                                  >
-                                    <div
-                                      className={`w-1.5 h-1.5 rounded-full shrink-0 ${getBookingColor(bookings.indexOf(b)).bg}`}
-                                    />
-                                    <span className="font-medium text-foreground truncate">{b.customer.name}</span>
-                                    <span className="text-muted-foreground ml-auto">{b.persons}p</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
-                </div>
-
-                {/* Booking bars */}
-                <div className="relative min-h-[20px] md:min-h-[24px]">
-                  {weekBookings.map(({ booking, colorIndex }, rowIdx) => {
-                    const bar = getBarSpan(booking, week);
-                    if (!bar) return null;
-                    const color = getBookingColor(colorIndex);
-                    return (
-                      <div
-                        key={booking.booking_id}
-                        className="grid grid-cols-7 absolute w-full"
-                        style={{ top: `${rowIdx * 18}px` }}
-                      >
-                        <div
-                          className={`${color.bg} ${color.text} rounded-sm px-1 py-px text-[9px] md:text-[11px] font-medium truncate cursor-pointer
-                            hover:brightness-95 transition-all leading-tight`}
-                          style={{
-                            gridColumnStart: bar.startIdx + 1,
-                            gridColumnEnd: bar.startIdx + 1 + bar.span,
-                            marginLeft: "1px",
-                            marginRight: "1px",
-                          }}
-                          onClick={() => setSelectedBooking(booking)}
+                    {/* Person count — big and prominent */}
+                    {personCount > 0 && isInMonth && (
+                      <div className="flex-1 flex flex-col items-center justify-center">
+                        <span
+                          className="text-lg md:text-xl font-bold leading-none"
+                          style={{ color: `hsl(var(--primary) / ${0.5 + intensity * 0.5})` }}
                         >
-                          {abbreviateName(booking.customer.name)}
-                        </div>
+                          {personCount}
+                        </span>
+                        <span className="text-[8px] md:text-[9px] text-muted-foreground mt-0.5">
+                          {bookingCount} pren.
+                        </span>
                       </div>
-                    );
-                  })}
-                  <div style={{ height: `${Math.max(weekBookings.length * 18 + 4, 20)}px` }} />
-                </div>
-              </div>
-            );
-          })}
+                    )}
+
+                    {/* Heatmap background */}
+                    {personCount > 0 && isInMonth && (
+                      <div
+                        className="absolute inset-0 rounded-sm pointer-events-none"
+                        style={{ backgroundColor: `hsl(var(--primary) / ${intensity * 0.12})` }}
+                      />
+                    )}
+
+                    {/* Popover */}
+                    <AnimatePresence>
+                      {isPopoverOpen && popoverData && (
+                        <motion.div
+                          initial={{ opacity: 0, scale: 0.9, y: -4 }}
+                          animate={{ opacity: 1, scale: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.9, y: -4 }}
+                          transition={{ type: "spring", damping: 22, stiffness: 400 }}
+                          className="absolute top-full left-1/2 -translate-x-1/2 z-50 mt-1 w-60 bg-card rounded-xl border border-border shadow-xl p-3"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs font-semibold text-foreground capitalize">
+                              {format(parseISO(dayStr), "EEEE d MMMM", { locale: it })}
+                            </span>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setPopoverDay(null); }}
+                              className="p-0.5 rounded hover:bg-muted"
+                            >
+                              <X className="w-3 h-3 text-muted-foreground" />
+                            </button>
+                          </div>
+                          <div className="flex items-baseline gap-2 mb-2">
+                            <span className="text-2xl font-bold text-primary">{popoverData.persons}</span>
+                            <span className="text-xs text-muted-foreground">
+                              persone · {popoverData.bookings.length} prenotazioni
+                            </span>
+                          </div>
+                          <div className="space-y-1 max-h-40 overflow-y-auto">
+                            {popoverData.bookings.map((b) => (
+                              <div
+                                key={b.booking_id}
+                                className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/50 text-[11px] cursor-pointer hover:bg-muted transition-colors"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedBooking(b);
+                                  setPopoverDay(null);
+                                }}
+                              >
+                                <div className={`w-2 h-2 rounded-full shrink-0 ${getBookingColor(bookings.indexOf(b)).bg}`} />
+                                <span className="font-medium text-foreground truncate">{b.customer.name}</span>
+                                <span className="text-muted-foreground ml-auto shrink-0">{b.persons} pers.</span>
+                              </div>
+                            ))}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* Close popover when clicking outside */}
+      {/* Close popover backdrop */}
       {popoverDay && (
         <div className="fixed inset-0 z-40" onClick={() => setPopoverDay(null)} />
       )}
