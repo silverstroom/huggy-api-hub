@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
+import { parseISO } from "date-fns";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { it } from "date-fns/locale";
@@ -337,13 +338,38 @@ export default function Index() {
                       />
                     </div>
                     {searchQuery.trim() && (
-                      <motion.p
+                      <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        className="text-xs text-muted-foreground mt-2"
+                        className="mt-3"
                       >
-                        {filteredBookings.length} risultat{filteredBookings.length === 1 ? "o" : "i"}
-                      </motion.p>
+                        <p className="text-xs text-muted-foreground mb-2">
+                          {filteredBookings.length} risultat{filteredBookings.length === 1 ? "o" : "i"}
+                        </p>
+                        {filteredBookings.length > 0 && (
+                          <div className="max-h-60 overflow-y-auto space-y-1 rounded-xl bg-muted/30 p-2">
+                            {filteredBookings.slice(0, 20).map((b) => (
+                              <button
+                                key={b.booking_id}
+                                onClick={() => {
+                                  handleToggleSearch(false);
+                                  setViewMode("list");
+                                  setSearchQuery(b.customer.name);
+                                }}
+                                className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted transition-colors text-left"
+                              >
+                                <div>
+                                  <span className="text-sm font-medium text-foreground">{b.customer.name}</span>
+                                  <span className="text-[11px] text-muted-foreground ml-2">
+                                    {format(parseISO(b.from), "d MMM", { locale: it })} → {format(parseISO(b.to), "d MMM", { locale: it })}
+                                  </span>
+                                </div>
+                                <span className="text-[11px] text-muted-foreground">{b.persons} pers.</span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </motion.div>
                     )}
                   </div>
                 </motion.div>
