@@ -78,10 +78,15 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-4 md:py-6">
         {/* Header */}
-        <div className="mb-4 md:mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring" as const, damping: 20 }}
+          className="mb-4 md:mb-6"
+        >
           <h1 className="text-xl md:text-2xl font-semibold text-foreground">Camping Ulisse</h1>
           <p className="text-xs md:text-sm text-muted-foreground">Calendario prenotazioni Color Fest</p>
-        </div>
+        </motion.div>
 
         {/* Stats */}
         <div className="mb-4 md:mb-6">
