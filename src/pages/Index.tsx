@@ -115,9 +115,18 @@ export default function Index() {
             >
               <ChevronLeft className="w-5 h-5 text-foreground" />
             </button>
-            <h2 className="text-base md:text-lg font-semibold text-foreground min-w-[140px] md:min-w-[160px] text-center capitalize">
-              {format(currentMonth, "MMMM yyyy", { locale: it })}
-            </h2>
+            <AnimatePresence mode="wait">
+              <motion.h2
+                key={format(currentMonth, "yyyy-MM")}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="text-base md:text-lg font-semibold text-foreground min-w-[140px] md:min-w-[160px] text-center capitalize"
+              >
+                {format(currentMonth, "MMMM yyyy", { locale: it })}
+              </motion.h2>
+            </AnimatePresence>
             <button
               onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
               className="p-1.5 rounded-lg hover:bg-muted transition-colors"
