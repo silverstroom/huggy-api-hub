@@ -29,6 +29,7 @@ export default function Index() {
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [maxCapacity, setMaxCapacity] = useState(200);
+  const [selectedBooking, setSelectedBooking] = useState<import("@/types/booking").Booking | null>(null);
   const isMobile = useIsMobile();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
