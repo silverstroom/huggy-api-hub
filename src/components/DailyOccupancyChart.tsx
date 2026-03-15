@@ -14,7 +14,7 @@ interface DailyOccupancyChartProps {
 
 export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: DailyOccupancyChartProps) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [focusWeek, setFocusWeek] = useState(true); // default: focus on Ferragosto week
+  const [focusWeek, setFocusWeek] = useState(true);
 
   const dailyData = useMemo(() => {
     const days = eachDayOfInterval({
@@ -57,21 +57,28 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
   const maxPersons = Math.max(...displayData.map((d) => d.persons), maxCapacity);
 
   return (
-    <div className="bg-card rounded-xl border border-border p-4 mb-4">
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3, type: "spring", damping: 20 }}
+      className="bg-card rounded-xl border border-border p-4 mb-4"
+    >
       <div className="flex items-center justify-between mb-3">
         <h3 className="text-sm font-semibold text-foreground">
           Presenze giornaliere {focusWeek && <span className="text-muted-foreground font-normal">· {FOCUS_START}–{FOCUS_END} ago</span>}
         </h3>
-        <button
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={() => setFocusWeek(!focusWeek)}
           className="flex items-center gap-1 px-2 py-1 text-[10px] font-medium rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors"
         >
           {focusWeek ? <ZoomOut className="w-3 h-3" /> : <ZoomIn className="w-3 h-3" />}
           {focusWeek ? "Mese intero" : "Ferragosto"}
-        </button>
+        </motion.button>
       </div>
-      <div className={`flex items-end gap-[3px] h-36`}>
-        {displayData.map(({ date, persons }) => {
+      <div className="flex items-end gap-[3px] h-36">
+        {displayData.map(({ date, persons }, idx) => {
           const heightPct = maxPersons > 0 ? (persons / maxPersons) * 100 : 0;
           const overCapacity = persons > maxCapacity;
           const isSelected = selectedDate && isSameDay(date, selectedDate);
@@ -81,24 +88,26 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
               className="flex-1 flex flex-col items-center justify-end group relative h-full cursor-pointer"
               onClick={() => setSelectedDate(isSelected ? null : date)}
             >
-              <div
-                className={`w-full min-w-[3px] rounded-t transition-all relative ${
+              <motion.div
+                initial={{ height: 0 }}
+                animate={{ height: `${Math.max(heightPct, persons > 0 ? 4 : 0)}%` }}
+                transition={{ delay: 0.4 + idx * 0.04, type: "spring", damping: 15, stiffness: 200 }}
+                className={`w-full min-w-[3px] rounded-t relative ${
                   isSelected
                     ? "bg-primary ring-1 ring-primary"
                     : overCapacity
                     ? "bg-destructive"
                     : "bg-primary/70"
                 }`}
-                style={{ height: `${Math.max(heightPct, persons > 0 ? 4 : 0)}%` }}
               >
-                {/* Tooltip anchored to top of bar */}
+                {/* Tooltip */}
                 <div className="absolute -top-9 left-1/2 -translate-x-1/2 hidden group-hover:flex flex-col items-center z-20 pointer-events-none">
                   <div className="bg-foreground text-background text-[11px] font-medium px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap">
                     {persons} <span className="opacity-70">pers.</span>
                   </div>
                   <div className="w-1.5 h-1.5 bg-foreground rotate-45 -mt-[3px]" />
                 </div>
-              </div>
+              </motion.div>
             </div>
           );
         })}
@@ -110,7 +119,7 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
         />
       </div>
       <div className="flex gap-[3px] mt-1">
-        {displayData.map(({ date, persons }, i) => (
+        {displayData.map(({ date }, i) => (
           <div
             key={i}
             className="flex-1 text-center cursor-pointer"
@@ -136,6 +145,7 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
+            transition={{ type: "spring", damping: 20 }}
             className="overflow-hidden"
           >
             <div className="mt-3 pt-3 border-t border-border">
@@ -158,8 +168,11 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
               ) : (
                 <div className="space-y-1 max-h-40 overflow-y-auto">
                   {selectedDayData.bookings.map((b, i) => (
-                    <div
+                    <motion.div
                       key={b.booking_id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
                       className="flex items-center gap-2 px-2 py-1.5 rounded-lg bg-muted/50 text-xs"
                     >
                       <div
@@ -170,7 +183,7 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
                       <span className="text-muted-foreground ml-auto whitespace-nowrap">
                         {b.persons} pers · {b.product_name}
                       </span>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
@@ -178,6 +191,6 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   );
 }

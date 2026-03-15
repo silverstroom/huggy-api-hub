@@ -1,14 +1,25 @@
 import { Booking } from "@/types/booking";
-import { format, parseISO, eachDayOfInterval, isSameDay } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { it } from "date-fns/locale";
-import { getBookingColor, abbreviateName } from "@/lib/bookingColors";
+import { getBookingColor } from "@/lib/bookingColors";
 import { useState } from "react";
 import { BookingDetailPanel } from "./BookingDetailPanel";
+import { motion } from "framer-motion";
 
 interface MobileDayListProps {
   bookings: Booking[];
   currentMonth: Date;
 }
+
+const dayVariants = {
+  hidden: { opacity: 0, x: -20 },
+  show: { opacity: 1, x: 0 },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 12, scale: 0.96 },
+  show: { opacity: 1, y: 0, scale: 1 },
+};
 
 export function MobileDayList({ bookings, currentMonth }: MobileDayListProps) {
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -23,14 +34,23 @@ export function MobileDayList({ bookings, currentMonth }: MobileDayListProps) {
     return bookings.filter((b) => dayStr >= b.from && dayStr < b.to);
   };
 
+  let visibleIdx = 0;
+
   return (
     <>
       <div className="space-y-2 pb-24">
         {days.map((day) => {
           const dayBookings = getBookingsForDay(day);
           if (dayBookings.length === 0) return null;
+          const currentIdx = visibleIdx++;
           return (
-            <div key={day.toISOString()}>
+            <motion.div
+              key={day.toISOString()}
+              variants={dayVariants}
+              initial="hidden"
+              animate="show"
+              transition={{ delay: currentIdx * 0.05, type: "spring", damping: 20, stiffness: 300 }}
+            >
               <div className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm px-1 py-1.5">
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   {format(day, "EEEE d MMMM", { locale: it })}
@@ -41,10 +61,16 @@ export function MobileDayList({ bookings, currentMonth }: MobileDayListProps) {
                   const colorIdx = bookings.indexOf(booking);
                   const color = getBookingColor(colorIdx);
                   return (
-                    <button
+                    <motion.button
                       key={`${booking.booking_id}-${day.toISOString()}`}
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="show"
+                      transition={{ delay: currentIdx * 0.05 + (i + 1) * 0.03, type: "spring", damping: 22 }}
+                      whileHover={{ scale: 1.02, x: 4 }}
+                      whileTap={{ scale: 0.97 }}
                       onClick={() => setSelectedBooking(booking)}
-                      className={`w-full text-left ${color.bg} rounded-xl px-3 py-2.5 transition-all active:scale-[0.98]`}
+                      className={`w-full text-left ${color.bg} rounded-xl px-3 py-2.5 transition-shadow hover:shadow-md`}
                     >
                       <div className="flex items-center justify-between">
                         <span className={`text-sm font-medium ${color.text}`}>
@@ -57,11 +83,11 @@ export function MobileDayList({ bookings, currentMonth }: MobileDayListProps) {
                       <span className={`text-xs ${color.text} opacity-60`}>
                         {format(parseISO(booking.from), "d MMM", { locale: it })} → {format(parseISO(booking.to), "d MMM", { locale: it })}
                       </span>
-                    </button>
+                    </motion.button>
                   );
                 })}
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
