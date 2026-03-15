@@ -425,6 +425,8 @@ export default function Index() {
           setShowSearch={handleToggleSearch}
         />
       )}
+
+      <BookingDetailPanel booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
     </div>
   );
 }
