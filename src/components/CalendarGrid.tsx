@@ -93,77 +93,78 @@ export function CalendarGrid({ bookings, currentMonth }: CalendarGridProps) {
 
   return (
     <>
-      <div className="bg-card rounded-lg shadow-[inset_0_0_0_1px_hsl(var(--border))] overflow-hidden">
-        {/* Weekday headers */}
-        <div className="grid grid-cols-7 border-b border-border">
-          {WEEKDAYS.map((day) => (
-            <div key={day} className="px-2 py-2 text-center">
-              <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">{day}</span>
-            </div>
-          ))}
-        </div>
+      <div className="bg-card rounded-lg shadow-[inset_0_0_0_1px_hsl(var(--border))] overflow-x-auto">
+        <div className="min-w-[500px]">
+          {/* Weekday headers */}
+          <div className="grid grid-cols-7 border-b border-border">
+            {WEEKDAYS.map((day) => (
+              <div key={day} className="px-1 md:px-2 py-2 text-center">
+                <span className="text-[10px] md:text-xs font-medium uppercase tracking-wider text-muted-foreground">{day}</span>
+              </div>
+            ))}
+          </div>
 
-        {/* Calendar weeks */}
-        {weeks.map((week, wi) => {
-          const weekBookings = getWeekBookings(week);
-          return (
-            <div key={wi} className="border-b border-border last:border-b-0">
-              {/* Day numbers */}
-              <div className="grid grid-cols-7">
-                {week.map((day) => (
-                  <div
-                    key={day.toISOString()}
-                    className={`px-2 pt-1.5 pb-0.5 text-right border-r border-border last:border-r-0 min-h-[28px] ${
-                      !isSameMonth(day, currentMonth) ? "opacity-30" : ""
-                    }`}
-                  >
-                    <span
-                      className={`text-xs font-medium ${
-                        isToday(day)
-                          ? "bg-primary text-primary-foreground rounded-full w-5 h-5 inline-flex items-center justify-center"
-                          : "text-foreground"
+          {/* Calendar weeks */}
+          {weeks.map((week, wi) => {
+            const weekBookings = getWeekBookings(week);
+            return (
+              <div key={wi} className="border-b border-border last:border-b-0">
+                {/* Day numbers */}
+                <div className="grid grid-cols-7">
+                  {week.map((day) => (
+                    <div
+                      key={day.toISOString()}
+                      className={`px-1 md:px-2 pt-1 md:pt-1.5 pb-0.5 text-right border-r border-border last:border-r-0 min-h-[24px] md:min-h-[28px] ${
+                        !isSameMonth(day, currentMonth) ? "opacity-30" : ""
                       }`}
                     >
-                      {format(day, "d")}
-                    </span>
-                  </div>
-                ))}
-              </div>
-
-              {/* Booking bars */}
-              <div className="relative min-h-[24px]">
-                {weekBookings.map(({ booking, colorIndex }, rowIdx) => {
-                  const bar = getBarSpan(booking, week);
-                  if (!bar) return null;
-                  const color = getBookingColor(colorIndex);
-                  return (
-                    <div
-                      key={booking.booking_id}
-                      className="grid grid-cols-7 absolute w-full"
-                      style={{ top: `${rowIdx * 22}px` }}
-                    >
-                      <div
-                        className={`${color.bg} ${color.text} rounded-sm px-1.5 py-0.5 text-[11px] font-medium truncate cursor-pointer
-                          hover:brightness-95 transition-all`}
-                        style={{
-                          gridColumnStart: bar.startIdx + 1,
-                          gridColumnEnd: bar.startIdx + 1 + bar.span,
-                          marginLeft: "2px",
-                          marginRight: "2px",
-                        }}
-                        onClick={() => setSelectedBooking(booking)}
+                      <span
+                        className={`text-[10px] md:text-xs font-medium ${
+                          isToday(day)
+                            ? "bg-primary text-primary-foreground rounded-full w-4 h-4 md:w-5 md:h-5 inline-flex items-center justify-center text-[9px] md:text-xs"
+                            : "text-foreground"
+                        }`}
                       >
-                        {abbreviateName(booking.customer.name)}
-                      </div>
+                        {format(day, "d")}
+                      </span>
                     </div>
-                  );
-                })}
-                {/* Spacer for rows */}
-                <div style={{ height: `${Math.max(weekBookings.length * 22 + 4, 24)}px` }} />
+                  ))}
+                </div>
+
+                {/* Booking bars */}
+                <div className="relative min-h-[20px] md:min-h-[24px]">
+                  {weekBookings.map(({ booking, colorIndex }, rowIdx) => {
+                    const bar = getBarSpan(booking, week);
+                    if (!bar) return null;
+                    const color = getBookingColor(colorIndex);
+                    return (
+                      <div
+                        key={booking.booking_id}
+                        className="grid grid-cols-7 absolute w-full"
+                        style={{ top: `${rowIdx * 18}px` }}
+                      >
+                        <div
+                          className={`${color.bg} ${color.text} rounded-sm px-1 py-px text-[9px] md:text-[11px] font-medium truncate cursor-pointer
+                            hover:brightness-95 transition-all leading-tight`}
+                          style={{
+                            gridColumnStart: bar.startIdx + 1,
+                            gridColumnEnd: bar.startIdx + 1 + bar.span,
+                            marginLeft: "1px",
+                            marginRight: "1px",
+                          }}
+                          onClick={() => setSelectedBooking(booking)}
+                        >
+                          {abbreviateName(booking.customer.name)}
+                        </div>
+                      </div>
+                    );
+                  })}
+                  <div style={{ height: `${Math.max(weekBookings.length * 18 + 4, 20)}px` }} />
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       <BookingDetailPanel booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
