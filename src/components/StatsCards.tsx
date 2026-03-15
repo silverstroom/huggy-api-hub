@@ -1,7 +1,7 @@
 import { Booking } from "@/types/booking";
 import { getDaysInMonth, parseISO, eachDayOfInterval, isWithinInterval, format } from "date-fns";
-import { CalendarDays, Users, Moon, TrendingUp } from "lucide-react";
-import { motion } from "framer-motion";
+import { CalendarDays, Users, TrendingUp } from "lucide-react";
+import { it as itLocale } from "date-fns/locale";
 
 interface StatsCardsProps {
   bookings: Booking[];
