@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
 import { it } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, CalendarDays, List, Search, X, Loader2, AlertCircle, RefreshCw, Settings2 } from "lucide-react";
 import { useBookings } from "@/hooks/useBookings";
