@@ -281,18 +281,10 @@ export default function Index() {
               exit={{ opacity: 0, y: -16 }}
               transition={{ type: "spring" as const, damping: 22, stiffness: 300 }}
             >
-              {isMobile ? (
-                viewMode === "list" ? (
-                  <BookingListView bookings={filteredBookings} />
-                ) : (
-                  <MobileDayList bookings={filteredBookings} currentMonth={currentMonth} />
-                )
+              {viewMode === "calendar" ? (
+                <CalendarGrid bookings={filteredBookings} currentMonth={currentMonth} />
               ) : (
-                viewMode === "calendar" ? (
-                  <CalendarGrid bookings={filteredBookings} currentMonth={currentMonth} />
-                ) : (
-                  <BookingListView bookings={filteredBookings} />
-                )
+                <BookingListView bookings={filteredBookings} />
               )}
             </motion.div>
           )}
