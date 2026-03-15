@@ -1,12 +1,23 @@
 import { Booking } from "@/types/booking";
 import { getDaysInMonth, parseISO, eachDayOfInterval, isWithinInterval, format } from "date-fns";
 import { CalendarDays, Users, Moon, TrendingUp } from "lucide-react";
+import { motion } from "framer-motion";
 
 interface StatsCardsProps {
   bookings: Booking[];
   currentMonth: Date;
   maxCapacity: number;
 }
+
+const container = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.08 } },
+};
+
+const item = {
+  hidden: { opacity: 0, y: 20, scale: 0.95 },
+  show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, damping: 20, stiffness: 300 } },
+};
 
 export function StatsCards({ bookings, currentMonth, maxCapacity }: StatsCardsProps) {
   const daysInMonth = getDaysInMonth(currentMonth);
@@ -16,7 +27,6 @@ export function StatsCards({ bookings, currentMonth, maxCapacity }: StatsCardsPr
   const monthStart = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
   const monthEnd = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), daysInMonth);
 
-  // Calculate person-nights per day, then occupancy vs capacity
   const personNightsPerDay = new Map<string, number>();
   bookings.forEach((b) => {
     const from = parseISO(b.from);
@@ -42,11 +52,19 @@ export function StatsCards({ bookings, currentMonth, maxCapacity }: StatsCardsPr
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+    <motion.div
+      className="grid grid-cols-2 lg:grid-cols-4 gap-3"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
       {stats.map((stat) => (
-        <div
+        <motion.div
           key={stat.label}
-          className="bg-card rounded-lg p-4 shadow-[inset_0_0_0_1px_hsl(var(--border))]"
+          variants={item}
+          whileHover={{ scale: 1.03, y: -2 }}
+          whileTap={{ scale: 0.97 }}
+          className="bg-card rounded-lg p-4 shadow-[inset_0_0_0_1px_hsl(var(--border))] cursor-default"
         >
           <div className="flex items-center gap-2 mb-1">
             <stat.icon className="w-4 h-4 text-primary" />
@@ -54,9 +72,17 @@ export function StatsCards({ bookings, currentMonth, maxCapacity }: StatsCardsPr
               {stat.label}
             </span>
           </div>
-          <p className="text-2xl font-semibold text-foreground">{stat.value}</p>
-        </div>
+          <motion.p
+            className="text-2xl font-semibold text-foreground"
+            key={String(stat.value)}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", damping: 20 }}
+          >
+            {stat.value}
+          </motion.p>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { format, startOfMonth, endOfMonth, addMonths, subMonths } from "date-fns";
+import { motion, AnimatePresence } from "framer-motion";
 import { it } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, CalendarDays, List, Search, X, Loader2, AlertCircle, RefreshCw, Settings2 } from "lucide-react";
 import { useBookings } from "@/hooks/useBookings";
@@ -77,10 +78,15 @@ export default function Index() {
     <div className="min-h-screen bg-background">
       <div className="max-w-6xl mx-auto px-4 py-4 md:py-6">
         {/* Header */}
-        <div className="mb-4 md:mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring" as const, damping: 20 }}
+          className="mb-4 md:mb-6"
+        >
           <h1 className="text-xl md:text-2xl font-semibold text-foreground">Camping Ulisse</h1>
           <p className="text-xs md:text-sm text-muted-foreground">Calendario prenotazioni Color Fest</p>
-        </div>
+        </motion.div>
 
         {/* Stats */}
         <div className="mb-4 md:mb-6">
@@ -109,9 +115,18 @@ export default function Index() {
             >
               <ChevronLeft className="w-5 h-5 text-foreground" />
             </button>
-            <h2 className="text-base md:text-lg font-semibold text-foreground min-w-[140px] md:min-w-[160px] text-center capitalize">
-              {format(currentMonth, "MMMM yyyy", { locale: it })}
-            </h2>
+            <AnimatePresence mode="wait">
+              <motion.h2
+                key={format(currentMonth, "yyyy-MM")}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{ duration: 0.2 }}
+                className="text-base md:text-lg font-semibold text-foreground min-w-[140px] md:min-w-[160px] text-center capitalize"
+              >
+                {format(currentMonth, "MMMM yyyy", { locale: it })}
+              </motion.h2>
+            </AnimatePresence>
             <button
               onClick={() => setCurrentMonth(addMonths(currentMonth, 1))}
               className="p-1.5 rounded-lg hover:bg-muted transition-colors"
@@ -225,23 +240,31 @@ export default function Index() {
           </div>
         )}
 
-        {!isLoading && !isError && (
-          <>
-            {isMobile ? (
-              viewMode === "list" ? (
-                <BookingListView bookings={filteredBookings} />
+        <AnimatePresence mode="wait">
+          {!isLoading && !isError && (
+            <motion.div
+              key={`${viewMode}-${statusFilter}`}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ type: "spring" as const, damping: 22, stiffness: 300 }}
+            >
+              {isMobile ? (
+                viewMode === "list" ? (
+                  <BookingListView bookings={filteredBookings} />
+                ) : (
+                  <MobileDayList bookings={filteredBookings} currentMonth={currentMonth} />
+                )
               ) : (
-                <MobileDayList bookings={filteredBookings} currentMonth={currentMonth} />
-              )
-            ) : (
-              viewMode === "calendar" ? (
-                <CalendarGrid bookings={filteredBookings} currentMonth={currentMonth} />
-              ) : (
-                <BookingListView bookings={filteredBookings} />
-              )
-            )}
-          </>
-        )}
+                viewMode === "calendar" ? (
+                  <CalendarGrid bookings={filteredBookings} currentMonth={currentMonth} />
+                ) : (
+                  <BookingListView bookings={filteredBookings} />
+                )
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Mobile nav — simplified, no filter */}
