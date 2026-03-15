@@ -184,26 +184,40 @@ export function BookingListView({ bookings }: BookingListViewProps) {
               className="bg-card rounded-lg shadow-[inset_0_0_0_1px_hsl(var(--border))] overflow-hidden"
             >
               {/* Day header */}
-              <button
-                onClick={() => toggleDay(group.date)}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors"
-              >
-                {isExpanded ? (
-                  <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
-                ) : (
-                  <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
-                )}
-                <span className="text-sm font-semibold text-foreground capitalize">
-                  {format(group.dateObj, "EEEE d MMMM yyyy", { locale: it })}
-                </span>
-                <div className="flex items-center gap-1 ml-auto">
-                  <Users className="w-3.5 h-3.5 text-primary" />
-                  <span className="text-xs font-semibold text-primary">{group.totalPersons}</span>
-                  <span className="text-[10px] text-muted-foreground ml-1">
-                    ({group.bookings.length} pren.)
+              <div className="flex items-center">
+                <button
+                  onClick={() => toggleDay(group.date)}
+                  className="flex-1 flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors"
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="w-4 h-4 text-muted-foreground shrink-0" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  )}
+                  <span className="text-sm font-semibold text-foreground capitalize">
+                    {format(group.dateObj, "EEEE d MMMM yyyy", { locale: it })}
                   </span>
-                </div>
-              </button>
+                  <div className="flex items-center gap-1 ml-auto">
+                    <Users className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-xs font-semibold text-primary">{group.totalPersons}</span>
+                    <span className="text-[10px] text-muted-foreground ml-1">
+                      ({group.bookings.length} pren.)
+                    </span>
+                  </div>
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const csv = generateCSV([group]);
+                    const filename = `prenotazioni_${format(group.dateObj, "yyyy-MM-dd")}.csv`;
+                    downloadCSV(csv, filename);
+                  }}
+                  className="p-2 mr-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
+                  title={`Scarica CSV ${format(group.dateObj, "d MMMM", { locale: it })}`}
+                >
+                  <Download className="w-3.5 h-3.5" />
+                </button>
+              </div>
 
               {/* Expanded booking list */}
               {isExpanded && (
