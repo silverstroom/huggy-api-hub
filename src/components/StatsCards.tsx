@@ -1,6 +1,7 @@
 import { Booking } from "@/types/booking";
 import { getDaysInMonth, parseISO, eachDayOfInterval, isWithinInterval, format } from "date-fns";
-import { CalendarDays, Users, Moon, TrendingUp } from "lucide-react";
+import { CalendarDays, Users, TrendingUp } from "lucide-react";
+import { it as itLocale } from "date-fns/locale";
 import { motion } from "framer-motion";
 
 interface StatsCardsProps {
@@ -44,10 +45,18 @@ export function StatsCards({ bookings, currentMonth, maxCapacity }: StatsCardsPr
   const maxPersonNights = maxCapacity * daysInMonth;
   const occupancy = maxPersonNights > 0 ? Math.round((totalPersonNights / maxPersonNights) * 100) : 0;
 
+  // Find peak day
+  let peakDay = "";
+  let peakVal = 0;
+  personNightsPerDay.forEach((v, k) => {
+    if (v > peakVal) { peakVal = v; peakDay = k; }
+  });
+  const peakLabel = peakDay ? format(parseISO(peakDay), "d MMM", { locale: itLocale }) : "—";
+
   const stats = [
     { label: "Prenotazioni", value: totalBookings, icon: CalendarDays },
     { label: "Persone", value: totalPersons, icon: Users },
-    { label: "Persone-notte", value: totalPersonNights, icon: Moon },
+    { label: "Picco", value: peakVal > 0 ? `${peakVal} · ${peakLabel}` : "—", icon: TrendingUp },
     { label: "Occupazione", value: `${occupancy}%`, icon: TrendingUp },
   ];
 
