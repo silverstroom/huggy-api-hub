@@ -54,10 +54,10 @@ export function StatsCards({ bookings, currentMonth, maxCapacity }: StatsCardsPr
   const peakLabel = peakDay ? format(parseISO(peakDay), "d MMM", { locale: itLocale }) : "—";
 
   const stats = [
-    { label: "Prenotazioni", value: totalBookings, icon: CalendarDays },
-    { label: "Persone", value: totalPersons, icon: Users },
-    { label: "Picco", value: peakVal > 0 ? `${peakVal} · ${peakLabel}` : "—", icon: TrendingUp },
-    { label: "Occupazione", value: `${occupancy}%`, icon: TrendingUp },
+    { label: "Prenotazioni", value: totalBookings, sub: null, icon: CalendarDays },
+    { label: "Persone totali", value: totalPersons, sub: null, icon: Users },
+    { label: "Giorno di picco", value: peakVal > 0 ? `${peakVal} pers.` : "—", sub: peakVal > 0 ? peakLabel : null, icon: TrendingUp },
+    { label: "Occupazione", value: `${occupancy}%`, sub: `${totalPersonNights} presenze-notte`, icon: TrendingUp },
   ];
 
   return (
@@ -90,6 +90,9 @@ export function StatsCards({ bookings, currentMonth, maxCapacity }: StatsCardsPr
           >
             {stat.value}
           </motion.p>
+          {stat.sub && (
+            <p className="text-[11px] text-muted-foreground mt-0.5">{stat.sub}</p>
+          )}
         </motion.div>
       ))}
     </motion.div>
