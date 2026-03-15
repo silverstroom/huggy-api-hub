@@ -196,7 +196,7 @@ export default function Index() {
         </div>
 
         {/* Mobile search bar — inline, toggleable */}
-        {showMobileSearch && isMobile && (
+        {showMobileSearch && (
           <div className="mb-3 flex items-center gap-2 lg:hidden">
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
