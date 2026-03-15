@@ -280,6 +280,7 @@ export default function Index() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -16 }}
               transition={{ type: "spring" as const, damping: 22, stiffness: 300 }}
+              className="pb-28"
             >
               {viewMode === "calendar" ? (
                 <CalendarGrid bookings={filteredBookings} currentMonth={currentMonth} />
