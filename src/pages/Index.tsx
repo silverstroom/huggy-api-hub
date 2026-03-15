@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { it } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, CalendarDays, List, Search, X, Loader2, AlertCircle, RefreshCw, Settings2 } from "lucide-react";
 import { useBookings } from "@/hooks/useBookings";
+import { BookingDetailPanel } from "@/components/BookingDetailPanel";
 import { StatsCards } from "@/components/StatsCards";
 import { CalendarGrid } from "@/components/CalendarGrid";
 import { BookingListView } from "@/components/BookingListView";
