@@ -240,23 +240,31 @@ export default function Index() {
           </div>
         )}
 
-        {!isLoading && !isError && (
-          <>
-            {isMobile ? (
-              viewMode === "list" ? (
-                <BookingListView bookings={filteredBookings} />
+        <AnimatePresence mode="wait">
+          {!isLoading && !isError && (
+            <motion.div
+              key={`${viewMode}-${statusFilter}`}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -16 }}
+              transition={{ type: "spring" as const, damping: 22, stiffness: 300 }}
+            >
+              {isMobile ? (
+                viewMode === "list" ? (
+                  <BookingListView bookings={filteredBookings} />
+                ) : (
+                  <MobileDayList bookings={filteredBookings} currentMonth={currentMonth} />
+                )
               ) : (
-                <MobileDayList bookings={filteredBookings} currentMonth={currentMonth} />
-              )
-            ) : (
-              viewMode === "calendar" ? (
-                <CalendarGrid bookings={filteredBookings} currentMonth={currentMonth} />
-              ) : (
-                <BookingListView bookings={filteredBookings} />
-              )
-            )}
-          </>
-        )}
+                viewMode === "calendar" ? (
+                  <CalendarGrid bookings={filteredBookings} currentMonth={currentMonth} />
+                ) : (
+                  <BookingListView bookings={filteredBookings} />
+                )
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Mobile nav — simplified, no filter */}
