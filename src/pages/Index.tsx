@@ -355,8 +355,7 @@ export default function Index() {
                                 key={b.booking_id}
                                 onClick={() => {
                                   handleToggleSearch(false);
-                                  setViewMode("list");
-                                  setSearchQuery(b.customer.name);
+                                  setSelectedBooking(b);
                                 }}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted transition-colors text-left"
                               >
