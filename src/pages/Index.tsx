@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { it } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, CalendarDays, List, Search, X, Loader2, AlertCircle, RefreshCw, Settings2 } from "lucide-react";
 import { useBookings } from "@/hooks/useBookings";
+import { BookingDetailPanel } from "@/components/BookingDetailPanel";
 import { StatsCards } from "@/components/StatsCards";
 import { CalendarGrid } from "@/components/CalendarGrid";
 import { BookingListView } from "@/components/BookingListView";
@@ -28,6 +29,7 @@ export default function Index() {
   const [viewMode, setViewMode] = useState<ViewMode>("calendar");
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [maxCapacity, setMaxCapacity] = useState(200);
+  const [selectedBooking, setSelectedBooking] = useState<import("@/types/booking").Booking | null>(null);
   const isMobile = useIsMobile();
   const searchInputRef = useRef<HTMLInputElement>(null);
 
@@ -353,8 +355,7 @@ export default function Index() {
                                 key={b.booking_id}
                                 onClick={() => {
                                   handleToggleSearch(false);
-                                  setViewMode("list");
-                                  setSearchQuery(b.customer.name);
+                                  setSelectedBooking(b);
                                 }}
                                 className="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-muted transition-colors text-left"
                               >
@@ -424,6 +425,8 @@ export default function Index() {
           setShowSearch={handleToggleSearch}
         />
       )}
+
+      <BookingDetailPanel booking={selectedBooking} onClose={() => setSelectedBooking(null)} />
     </div>
   );
 }
