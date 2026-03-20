@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { eachDayOfInterval, startOfMonth, endOfMonth, format, isWithinInterval, parseISO, isSameDay, getDate } from "date-fns";
+import { eachDayOfInterval, startOfMonth, endOfMonth, format, isWithinInterval, parseISO, isSameDay, getDate, addDays } from "date-fns";
 import { it } from "date-fns/locale";
 import { X, Users, ZoomIn, ZoomOut } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,7 +28,7 @@ export function DailyOccupancyChart({ bookings, currentMonth, maxCapacity }: Dai
       bookings.forEach((b) => {
         if (b.status === "cancelled") return;
         const from = parseISO(b.from);
-        const to = parseISO(b.to);
+        const to = addDays(parseISO(b.to), -1); // checkout day excluded
         if (isWithinInterval(day, { start: from, end: to })) {
           persons += b.persons;
           dayBookings.push(b);
