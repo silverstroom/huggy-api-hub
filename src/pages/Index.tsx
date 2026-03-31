@@ -30,8 +30,41 @@ export default function Index() {
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   const [maxCapacity, setMaxCapacity] = useState(200);
   const [selectedBooking, setSelectedBooking] = useState<import("@/types/booking").Booking | null>(null);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const isMobile = useIsMobile();
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const pullStartY = useRef<number | null>(null);
+  const [pullDistance, setPullDistance] = useState(0);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    await refetch();
+    setTimeout(() => setIsRefreshing(false), 600);
+  };
+
+  // Pull to refresh handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (contentRef.current && contentRef.current.scrollTop === 0) {
+      pullStartY.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (pullStartY.current === null) return;
+    const delta = e.touches[0].clientY - pullStartY.current;
+    if (delta > 0 && contentRef.current && contentRef.current.scrollTop === 0) {
+      setPullDistance(Math.min(delta * 0.4, 80));
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (pullDistance > 50) {
+      handleRefresh();
+    }
+    setPullDistance(0);
+    pullStartY.current = null;
+  };
 
   const from = startOfMonth(currentMonth);
   const to = endOfMonth(currentMonth);
