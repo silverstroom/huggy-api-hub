@@ -221,8 +221,20 @@ export default function Index() {
             transition={{ type: "spring" as const, damping: 20 }}
             className="mb-4 md:mb-6"
           >
-            <h1 className="text-xl md:text-2xl font-semibold text-foreground">Camping Ulisse</h1>
-            <p className="text-xs md:text-sm text-muted-foreground">Calendario prenotazioni Color Fest</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-xl md:text-2xl font-semibold text-foreground">Camping Ulisse</h1>
+                <p className="text-xs md:text-sm text-muted-foreground">Calendario prenotazioni Color Fest</p>
+              </div>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="p-2 rounded-xl hover:bg-muted transition-colors disabled:opacity-50"
+                title="Aggiorna dati"
+              >
+                <RefreshCw className={`w-5 h-5 text-muted-foreground ${isRefreshing ? "animate-spin" : ""}`} />
+              </button>
+            </div>
           </motion.div>
 
           {/* Stats */}
