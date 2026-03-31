@@ -213,7 +213,40 @@ export default function Index() {
 
       {/* Main content — hidden behind splash */}
       {!showSplash && (
-        <div className="max-w-6xl mx-auto px-4 py-4 md:py-6">
+        <div
+          ref={contentRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="max-w-6xl mx-auto px-4 py-4 md:py-6 relative"
+        >
+          {/* Pull to refresh indicator */}
+          <AnimatePresence>
+            {pullDistance > 0 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="flex justify-center mb-2"
+              >
+                <motion.div
+                  animate={{ rotate: pullDistance > 50 ? 180 : 0 }}
+                  className="flex items-center gap-2 text-muted-foreground"
+                >
+                  <RefreshCw className={`w-4 h-4 ${pullDistance > 50 ? "text-primary" : ""}`} />
+                  <span className="text-xs">{pullDistance > 50 ? "Rilascia per aggiornare" : "Trascina per aggiornare"}</span>
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          {isRefreshing && (
+            <div className="flex justify-center mb-3">
+              <div className="flex items-center gap-2 text-primary">
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span className="text-xs">Aggiornamento in corso...</span>
+              </div>
+            </div>
+          )}
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -10 }}
