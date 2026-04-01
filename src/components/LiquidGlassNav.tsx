@@ -18,7 +18,7 @@ export function LiquidGlassNav({
   setShowSearch,
 }: LiquidGlassNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 lg:hidden pb-safe">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 pb-safe">
       <div className="mx-3 mb-3">
         <div className="glass-surface rounded-[22px] px-2 py-2">
           <div className="flex items-center justify-around">
