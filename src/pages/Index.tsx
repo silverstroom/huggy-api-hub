@@ -385,7 +385,7 @@ export default function Index() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50 lg:hidden"
+                  className="fixed inset-0 bg-foreground/20 backdrop-blur-sm z-50"
                   onClick={() => handleToggleSearch(false)}
                 />
                 <motion.div
@@ -393,7 +393,7 @@ export default function Index() {
                   animate={{ opacity: 1, scale: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95, y: -20 }}
                   transition={{ type: "spring" as const, damping: 22, stiffness: 300 }}
-                  className="fixed top-20 left-4 right-4 z-50 lg:hidden"
+                  className="fixed top-20 left-4 right-4 z-50 max-w-lg lg:left-1/2 lg:-translate-x-1/2"
                 >
                   <div className="bg-card rounded-2xl border border-border shadow-xl p-4">
                     <div className="flex items-center gap-2 mb-3">
